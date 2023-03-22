@@ -1,11 +1,7 @@
 import {
   Box,
   Button,
-  Card,
-  CardBody,
-  CardHeader,
   Flex,
-  Heading,
   IconButton,
   Link,
   Skeleton,
