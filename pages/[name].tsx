@@ -100,33 +100,13 @@ const Profile: NextPage = () => {
     fetchProfile();
   }, [name]);
 
-  if (!nameFound) {
-    return <Text>Name not found</Text>;
-  }
-  if (
-    typeof profile !== "undefined" &&
-    !profile.name &&
-    !profile.theme &&
-    !profile.bio &&
-    !profile.links &&
-    !profile.avatar_contract_id &&
-    !profile.avatar_token_id
-  ) {
-    return (
-      <>
-        <Text mb="3">Owner has not set up their profile</Text>
-        <Button
-          as={Link}
-          href={`https://koinosblocks.com/address/${address}`}
-          target="_blank"
-        >
-          View Address on Koinosblocks
-        </Button>
-      </>
-    );
-  }
   return (
-    <Skeleton isLoaded={!!profile} borderRadius="0" width="100%" height="100%">
+    <Skeleton
+      isLoaded={!!profile || !nameFound}
+      borderRadius="0"
+      width="100%"
+      height="100%"
+    >
       <Flex
         background={`#${theme}`}
         color={isThemeLight ? "gray.800" : "white"}
@@ -136,91 +116,117 @@ const Profile: NextPage = () => {
         height="100%"
         direction="column"
       >
-        {!isMobile && <Box height="3.5em" />}
-        <Stack
-          alignItems="center"
-          maxWidth="30em"
-          margin="0 auto"
-          gap="2"
-          padding="8"
-        >
-          {profile?.avatar_contract_id && profile.avatar_token_id ? (
-            <SkeletonCircle width="12em" height="12em" isLoaded={!!avatarSrc}>
-              <Avatar size="12em" src={avatarSrc} />
-            </SkeletonCircle>
-          ) : (
-            <Flex
-              width="12em"
-              height="12em"
-              borderRadius="50%"
-              background="gray.400"
-              justifyContent="center"
-              alignItems="center"
+        <Box height="3.5em" />
+        {!nameFound ? (
+          <Text>Name not found</Text>
+        ) : !profile?.name &&
+          !profile?.theme &&
+          !profile?.bio &&
+          !profile?.links &&
+          !profile?.avatar_contract_id &&
+          !profile?.avatar_token_id ? (
+          <Flex direction="column" gap="3">
+            <Text>Owner has not set up their profile</Text>
+            <Button
+              as={Link}
+              href={`https://koinosblocks.com/address/${address}`}
+              target="_blank"
             >
-              No Avatar Set
-            </Flex>
-          )}
-          <Text fontSize="4xl" lineHeight="1">
-            {profile?.name}
-          </Text>
-          <Text textAlign="center">{profile?.bio}</Text>
-          <Flex gap="2" flexWrap="wrap" justifyContent="center" maxWidth="20em">
-            {profile?.links?.map(({ key, value }) => {
-              let link;
-              switch (key) {
-                case SocialKeys.BTC:
-                  link = `https://blockstream.info/address/${value}`;
-                  break;
-                case SocialKeys.ETH:
-                  link = `https://etherscan.io/address/${value}`;
-                  break;
-                case SocialKeys.EMAIL:
-                  link = `mailto:${value}`;
-                  break;
-                case SocialKeys.WEBSITE:
-                  link = `https://${value}`;
-                  break;
-                case SocialKeys.GITHUB:
-                  link = `https://github.com/${value}`;
-                  break;
-                case SocialKeys.REDDIT:
-                  link = `https://reddit.com/u/${value}`;
-                  break;
-                case SocialKeys.DISCORD:
-                  link = `https://discord.com/users/${value}`;
-                  break;
-                case SocialKeys.TELEGRAM:
-                  link = `https://t.me/${value}`;
-                  break;
-                case SocialKeys.TWITTER:
-                  link = `https://twitter.com/${value}`;
-                  break;
-              }
-              return (
-                <IconButton
-                  as={Link}
-                  aria-label={key}
-                  key={key}
-                  icon={ICONS[key as SocialKeys]}
-                  variant="outline"
-                  size="lg"
-                  color={isThemeLight ? "gray.800" : "white"}
-                  borderRadius="50%"
-                  borderColor={
-                    isThemeLight ? "blackAlpha.400" : "whiteAlpha.400"
-                  }
-                  _hover={{
-                    background: isThemeLight
-                      ? "blackAlpha.200"
-                      : "whiteAlpha.200",
-                  }}
-                  href={link}
-                  target="_blank"
-                />
-              );
-            })}
+              View Address on Koinosblocks
+            </Button>
           </Flex>
-        </Stack>
+        ) : (
+          <Stack
+            alignItems="center"
+            maxWidth="30em"
+            margin="0 auto"
+            gap="2"
+            padding="8"
+          >
+            {profile?.avatar_contract_id && profile.avatar_token_id ? (
+              <SkeletonCircle width="12em" height="12em" isLoaded={!!avatarSrc}>
+                <Avatar size="12em" src={avatarSrc} />
+              </SkeletonCircle>
+            ) : (
+              <Flex
+                width="12em"
+                height="12em"
+                borderRadius="50%"
+                borderColor={isThemeLight ? "blackAlpha.400" : "whiteAlpha.400"}
+                borderWidth="1px"
+                justifyContent="center"
+                alignItems="center"
+              >
+                No Avatar Set
+              </Flex>
+            )}
+            <Text fontSize="4xl" lineHeight="1">
+              {profile?.name || "No Name Set"}
+            </Text>
+            <Text textAlign="center">{profile?.bio}</Text>
+            <Flex
+              gap="2"
+              flexWrap="wrap"
+              justifyContent="center"
+              maxWidth="20em"
+            >
+              {profile?.links?.map(({ key, value }) => {
+                let link;
+                switch (key) {
+                  case SocialKeys.BTC:
+                    link = `https://blockstream.info/address/${value}`;
+                    break;
+                  case SocialKeys.ETH:
+                    link = `https://etherscan.io/address/${value}`;
+                    break;
+                  case SocialKeys.EMAIL:
+                    link = `mailto:${value}`;
+                    break;
+                  case SocialKeys.WEBSITE:
+                    link = `https://${value}`;
+                    break;
+                  case SocialKeys.GITHUB:
+                    link = `https://github.com/${value}`;
+                    break;
+                  case SocialKeys.REDDIT:
+                    link = `https://reddit.com/u/${value}`;
+                    break;
+                  case SocialKeys.DISCORD:
+                    link = `https://discord.com/users/${value}`;
+                    break;
+                  case SocialKeys.TELEGRAM:
+                    link = `https://t.me/${value}`;
+                    break;
+                  case SocialKeys.TWITTER:
+                    link = `https://twitter.com/${value}`;
+                    break;
+                }
+                return (
+                  <IconButton
+                    as={Link}
+                    aria-label={key}
+                    key={key}
+                    icon={ICONS[key as SocialKeys]}
+                    variant="outline"
+                    size="lg"
+                    color={isThemeLight ? "gray.800" : "white"}
+                    borderRadius="50%"
+                    borderColor={
+                      isThemeLight ? "blackAlpha.400" : "whiteAlpha.400"
+                    }
+                    _hover={{
+                      background: isThemeLight
+                        ? "blackAlpha.200"
+                        : "whiteAlpha.200",
+                    }}
+                    href={link}
+                    target="_blank"
+                  />
+                );
+              })}
+            </Flex>
+          </Stack>
+        )}
 
         <Flex
           justifyContent="center"
@@ -229,8 +235,8 @@ const Profile: NextPage = () => {
           alignItems="center"
           flexWrap="wrap"
           gap="2"
-          color={isThemeLight ? "gray.600" : "gray.100"}
-          fontSize="sm"
+          color={isThemeLight ? "gray.600" : "gray.200"}
+          fontSize="xs"
         >
           <Flex
             flex="1"
@@ -251,7 +257,7 @@ const Profile: NextPage = () => {
             <Text>
               Powered by{" "}
               <Link target="_blank" href="https://kap.domains">
-                <Logo size="5em" light={isThemeLight} />
+                <Logo size="4em" light={isThemeLight} />
               </Link>
             </Text>
           </Flex>

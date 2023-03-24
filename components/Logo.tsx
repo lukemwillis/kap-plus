@@ -6,7 +6,7 @@ interface LogoProps {
 }
 
 export default function Logo({ size, light = false }: LogoProps) {
-  const fill = light ? "#1A202C" : "white";
+  const fill = light ? "#1A202C" : "#E2E8F0";
   return (
     <Icon
       x="0px"
@@ -15,7 +15,6 @@ export default function Logo({ size, light = false }: LogoProps) {
       width={size}
       viewBox="0 0 708.661 255.118"
       enable-background="new 0 0 708.661 255.118"
-      mb="1"
     >
       <g id="Shadow">
         <g>
