@@ -27,6 +27,7 @@ import { NextPage } from "next";
 import { useRouter } from "next/router";
 import Logo from "../components/Logo";
 import { FaTwitter } from "react-icons/fa";
+import Head from "next/head";
 
 const profileAbi: Abi = {
   koilib_types: profileAbiJson.types,
@@ -45,7 +46,6 @@ const Profile: NextPage = () => {
   const [nameFound, setNameFound] = useState(true);
   const [avatarSrc, setAvatarSrc] = useState("");
   const theme = profile?.theme || "fff";
-  const isMobile = useBreakpointValue({ base: true, sm: false });
 
   useEffect(() => {
     const profileContract = new Contract({
@@ -101,179 +101,190 @@ const Profile: NextPage = () => {
   }, [name]);
 
   return (
-    <Skeleton
-      isLoaded={!!profile || !nameFound}
-      borderRadius="0"
-      width="100%"
-      height="100%"
-    >
-      <Flex
-        background={`#${theme}`}
-        color={isThemeLight ? "gray.800" : "white"}
-        alignItems="center"
-        justifyContent="space-between"
+    <>
+      <Head>
+        <title>{profile?.name || name} | KAP+</title>
+      </Head>
+      <Skeleton
+        isLoaded={!!profile || !nameFound}
+        borderRadius="0"
         width="100%"
         height="100%"
-        direction="column"
       >
-        <Box height="3.5em" />
-        {!nameFound ? (
-          <Text>Name not found</Text>
-        ) : !profile?.name &&
-          !profile?.theme &&
-          !profile?.bio &&
-          !profile?.links &&
-          !profile?.avatar_contract_id &&
-          !profile?.avatar_token_id ? (
-          <Flex direction="column" gap="3">
-            <Text>Owner has not set up their profile</Text>
-            <Button
-              as={Link}
-              href={`https://koinosblocks.com/address/${address}`}
-              target="_blank"
-            >
-              View Address on Koinosblocks
-            </Button>
-          </Flex>
-        ) : (
-          <Stack
-            alignItems="center"
-            maxWidth="30em"
-            margin="0 auto"
-            gap="2"
-            padding="8"
-          >
-            {profile?.avatar_contract_id && profile.avatar_token_id ? (
-              <SkeletonCircle width="12em" height="12em" isLoaded={!!avatarSrc}>
-                <Avatar size="12em" src={avatarSrc} />
-              </SkeletonCircle>
-            ) : (
-              <Flex
-                width="12em"
-                height="12em"
-                borderRadius="50%"
-                borderColor={isThemeLight ? "blackAlpha.400" : "whiteAlpha.400"}
-                borderWidth="1px"
-                justifyContent="center"
-                alignItems="center"
-              >
-                No Avatar Set
-              </Flex>
-            )}
-            <Text fontSize="4xl" lineHeight="1">
-              {profile?.name || "No Name Set"}
-            </Text>
-            <Text textAlign="center">{profile?.bio}</Text>
-            <Flex
-              gap="2"
-              flexWrap="wrap"
-              justifyContent="center"
-              maxWidth="20em"
-            >
-              {profile?.links?.map(({ key, value }) => {
-                let link;
-                switch (key) {
-                  case SocialKeys.BTC:
-                    link = `https://blockstream.info/address/${value}`;
-                    break;
-                  case SocialKeys.ETH:
-                    link = `https://etherscan.io/address/${value}`;
-                    break;
-                  case SocialKeys.EMAIL:
-                    link = `mailto:${value}`;
-                    break;
-                  case SocialKeys.WEBSITE:
-                    link = `https://${value}`;
-                    break;
-                  case SocialKeys.GITHUB:
-                    link = `https://github.com/${value}`;
-                    break;
-                  case SocialKeys.REDDIT:
-                    link = `https://reddit.com/u/${value}`;
-                    break;
-                  case SocialKeys.DISCORD:
-                    link = `https://discord.com/users/${value}`;
-                    break;
-                  case SocialKeys.TELEGRAM:
-                    link = `https://t.me/${value}`;
-                    break;
-                  case SocialKeys.TWITTER:
-                    link = `https://twitter.com/${value}`;
-                    break;
-                }
-                return (
-                  <IconButton
-                    as={Link}
-                    aria-label={key}
-                    key={key}
-                    icon={ICONS[key as SocialKeys]}
-                    variant="outline"
-                    size="lg"
-                    color={isThemeLight ? "gray.800" : "white"}
-                    borderRadius="50%"
-                    borderColor={
-                      isThemeLight ? "blackAlpha.400" : "whiteAlpha.400"
-                    }
-                    _hover={{
-                      background: isThemeLight
-                        ? "blackAlpha.200"
-                        : "whiteAlpha.200",
-                    }}
-                    href={link}
-                    target="_blank"
-                  />
-                );
-              })}
-            </Flex>
-          </Stack>
-        )}
-
         <Flex
-          justifyContent="center"
-          width="100%"
-          padding="4"
+          background={`#${theme}`}
+          color={isThemeLight ? "gray.800" : "white"}
           alignItems="center"
-          flexWrap="wrap"
-          gap="2"
-          color={isThemeLight ? "gray.600" : "gray.200"}
-          fontSize="xs"
+          justifyContent="space-between"
+          width="100%"
+          height="100%"
+          direction="column"
         >
+          <Box height="3.5em" />
+          {!nameFound ? (
+            <Text>Name not found</Text>
+          ) : !profile?.name &&
+            !profile?.theme &&
+            !profile?.bio &&
+            !profile?.links &&
+            !profile?.avatar_contract_id &&
+            !profile?.avatar_token_id ? (
+            <Flex direction="column" gap="3">
+              <Text>Owner has not set up their profile</Text>
+              <Button
+                as={Link}
+                href={`https://koinosblocks.com/address/${address}`}
+                target="_blank"
+              >
+                View Address on Koinosblocks
+              </Button>
+            </Flex>
+          ) : (
+            <Stack
+              alignItems="center"
+              maxWidth="30em"
+              margin="0 auto"
+              gap="2"
+              padding="8"
+            >
+              {profile?.avatar_contract_id && profile.avatar_token_id ? (
+                <SkeletonCircle
+                  width="12em"
+                  height="12em"
+                  isLoaded={!!avatarSrc}
+                >
+                  <Avatar size="12em" src={avatarSrc} />
+                </SkeletonCircle>
+              ) : (
+                <Flex
+                  width="12em"
+                  height="12em"
+                  borderRadius="50%"
+                  borderColor={
+                    isThemeLight ? "blackAlpha.400" : "whiteAlpha.400"
+                  }
+                  borderWidth="1px"
+                  justifyContent="center"
+                  alignItems="center"
+                >
+                  No Avatar Set
+                </Flex>
+              )}
+              <Text fontSize="4xl" lineHeight="1">
+                {profile?.name || "No Name Set"}
+              </Text>
+              <Text textAlign="center">{profile?.bio}</Text>
+              <Flex
+                gap="2"
+                flexWrap="wrap"
+                justifyContent="center"
+                maxWidth="20em"
+              >
+                {profile?.links?.map(({ key, value }) => {
+                  let link;
+                  switch (key) {
+                    case SocialKeys.BTC:
+                      link = `https://blockstream.info/address/${value}`;
+                      break;
+                    case SocialKeys.ETH:
+                      link = `https://etherscan.io/address/${value}`;
+                      break;
+                    case SocialKeys.EMAIL:
+                      link = `mailto:${value}`;
+                      break;
+                    case SocialKeys.WEBSITE:
+                      link = `https://${value}`;
+                      break;
+                    case SocialKeys.GITHUB:
+                      link = `https://github.com/${value}`;
+                      break;
+                    case SocialKeys.REDDIT:
+                      link = `https://reddit.com/u/${value}`;
+                      break;
+                    case SocialKeys.DISCORD:
+                      link = `https://discord.com/users/${value}`;
+                      break;
+                    case SocialKeys.TELEGRAM:
+                      link = `https://t.me/${value}`;
+                      break;
+                    case SocialKeys.TWITTER:
+                      link = `https://twitter.com/${value}`;
+                      break;
+                  }
+                  return (
+                    <IconButton
+                      as={Link}
+                      aria-label={key}
+                      key={key}
+                      icon={ICONS[key as SocialKeys]}
+                      variant="outline"
+                      size="lg"
+                      color={isThemeLight ? "gray.800" : "white"}
+                      borderRadius="50%"
+                      borderColor={
+                        isThemeLight ? "blackAlpha.400" : "whiteAlpha.400"
+                      }
+                      _hover={{
+                        background: isThemeLight
+                          ? "blackAlpha.200"
+                          : "whiteAlpha.200",
+                      }}
+                      href={link}
+                      target="_blank"
+                    />
+                  );
+                })}
+              </Flex>
+            </Stack>
+          )}
+
           <Flex
-            flex="1"
-            justifyContent="start"
-            order={{ base: 2, md: 1 }}
-            width="auto"
-          >
-            <Text whiteSpace="nowrap">
-              &copy; {new Date().getFullYear()} Top Level Accounts, Inc.
-            </Text>
-          </Flex>
-          <Flex
-            flex="1"
             justifyContent="center"
-            order={{ base: 1, md: 2 }}
-            flexBasis={{ base: "100%", md: "1" }}
+            width="100%"
+            padding="4"
+            alignItems="center"
+            flexWrap="wrap"
+            gap="2"
+            color={isThemeLight ? "gray.600" : "gray.200"}
+            fontSize="xs"
           >
-            <Text>
-              Powered by{" "}
-              <Link target="_blank" href="https://kap.domains">
-                <Logo size="4em" light={isThemeLight} />
-              </Link>
-            </Text>
-          </Flex>
-          <Flex flex="1" justifyContent="end" order="3">
-            <IconButton
-              as={Link}
-              href="https://twitter.com/kapdomains"
-              aria-label="KAP Twitter"
-              icon={<FaTwitter />}
-              variant="link"
-              color={isThemeLight ? "gray.600" : "gray.100"}
-            />
+            <Flex
+              flex="1"
+              justifyContent="start"
+              order={{ base: 2, md: 1 }}
+              width="auto"
+            >
+              <Text whiteSpace="nowrap">
+                &copy; {new Date().getFullYear()} Top Level Accounts, Inc.
+              </Text>
+            </Flex>
+            <Flex
+              flex="1"
+              justifyContent="center"
+              order={{ base: 1, md: 2 }}
+              flexBasis={{ base: "100%", md: "1" }}
+            >
+              <Text>
+                Powered by{" "}
+                <Link target="_blank" href="https://kap.domains">
+                  <Logo size="4em" light={isThemeLight} />
+                </Link>
+              </Text>
+            </Flex>
+            <Flex flex="1" justifyContent="end" order="3">
+              <IconButton
+                as={Link}
+                href="https://twitter.com/kapdomains"
+                aria-label="KAP Twitter"
+                icon={<FaTwitter />}
+                variant="link"
+                color={isThemeLight ? "gray.600" : "gray.100"}
+              />
+            </Flex>
           </Flex>
         </Flex>
-      </Flex>
-    </Skeleton>
+      </Skeleton>
+    </>
   );
 };
 
