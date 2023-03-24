@@ -116,7 +116,7 @@ const Profile: NextPage = () => {
         height="100%"
         direction="column"
       >
-        {!isMobile && <Box height="3.5em" />}
+        <Box height="3.5em" />
         {!nameFound ? (
           <Text>Name not found</Text>
         ) : !profile?.name &&
@@ -152,7 +152,8 @@ const Profile: NextPage = () => {
                 width="12em"
                 height="12em"
                 borderRadius="50%"
-                background="gray.400"
+                borderColor={isThemeLight ? "blackAlpha.400" : "whiteAlpha.400"}
+                borderWidth="1px"
                 justifyContent="center"
                 alignItems="center"
               >
@@ -234,8 +235,8 @@ const Profile: NextPage = () => {
           alignItems="center"
           flexWrap="wrap"
           gap="2"
-          color={isThemeLight ? "gray.600" : "gray.100"}
-          fontSize="sm"
+          color={isThemeLight ? "gray.600" : "gray.200"}
+          fontSize="xs"
         >
           <Flex
             flex="1"
@@ -256,7 +257,7 @@ const Profile: NextPage = () => {
             <Text>
               Powered by{" "}
               <Link target="_blank" href="https://kap.domains">
-                <Logo size="5em" light={isThemeLight} />
+                <Logo size="4em" light={isThemeLight} />
               </Link>
             </Text>
           </Flex>
