@@ -103,7 +103,7 @@ const Profile: NextPage = () => {
   return (
     <>
       <Head>
-        <title>{profile?.name || name} | KAP+</title>
+        <title>{profile?.name || name || "Loading..."} | KAP+</title>
       </Head>
       <Skeleton
         isLoaded={!!profile || !nameFound}
