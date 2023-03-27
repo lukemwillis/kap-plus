@@ -8,7 +8,6 @@ import {
   SkeletonCircle,
   Stack,
   Text,
-  useBreakpointValue,
 } from "@chakra-ui/react";
 import Avatar from "../components/Avatar";
 import { ICONS, SocialKeys } from "../components/SocialLinks";
@@ -99,6 +98,14 @@ const Profile: NextPage = () => {
     };
     fetchProfile();
   }, [name]);
+
+  useEffect(() => {
+    if (!!profile || !nameFound) {
+      window.gtag("config", process.env.NEXT_PUBLIC_GOOGLE_ANALYTICS || "", {
+        page_path: window.location.pathname,
+      });
+    }
+  }, [profile, nameFound]);
 
   return (
     <>
