@@ -1,32 +1,30 @@
-import { Image, SkeletonCircle } from "@chakra-ui/react";
+import { Image, SkeletonCircle, Flex } from "@chakra-ui/react";
 import { createAvatar } from "@dicebear/avatars";
 import * as identiconStyle from "@dicebear/avatars-identicon-sprites";
 import { useEffect, useState } from "react";
 import dynamic from "next/dynamic";
-import { useAccount } from "../context/AccountProvider";
-import { useProfile } from "../context/ProfileProvider";
 
 interface AvatarProps {
   src?: string;
   size: string;
+  address: string;
+  message?: string;
 }
 
-function Avatar({ src, size }: AvatarProps) {
-  const { address } = useAccount();
-  const { avatarSrc } = useProfile();
+function Avatar({ src, size, address, message }: AvatarProps) {
   const [hasError, setHasError] = useState(false);
 
   useEffect(() => {
     if (hasError) {
       setHasError(false);
     }
-  }, [src, avatarSrc, setHasError, hasError]);
+  }, [src, address, setHasError, hasError]);
 
-  if (!hasError && (src || avatarSrc)) {
+  if (!hasError && src) {
     return (
       <Image
         fallback={<SkeletonCircle height={size} width={size} flexShrink="0" />}
-        src={src || avatarSrc}
+        src={src}
         width={size}
         height={size}
         borderRadius="50%"
@@ -41,17 +39,36 @@ function Avatar({ src, size }: AvatarProps) {
 
     return (
       <div
-        dangerouslySetInnerHTML={{ __html: identicon }}
         style={{
-          display: "block",
           width: size,
           height: size,
-          borderRadius: "50%",
-          overflow: "hidden",
-          flexShrink: "0",
-          background: "white"
         }}
-      />
+      >
+        <div
+          dangerouslySetInnerHTML={{ __html: identicon }}
+          style={{
+            display: "block",
+            position: "absolute",
+            width: size,
+            height: size,
+            borderRadius: "50%",
+            overflow: "hidden",
+            flexShrink: "0",
+            background: "white",
+          }}
+        />
+        <Flex
+          position="absolute"
+          width={size}
+          height={size}
+          borderRadius="50%"
+          justifyContent="center"
+          alignItems="center"
+          background="blackAlpha.800"
+        >
+          {message}
+        </Flex>
+      </div>
     );
   }
 }
