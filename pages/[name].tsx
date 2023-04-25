@@ -10,47 +10,95 @@ import {
   Text,
 } from "@chakra-ui/react";
 import Avatar from "../components/Avatar";
-import { ICONS, SocialKeys } from "../components/SocialLinks";
 import { useEffect, useState } from "react";
+import { AddIcon, EmailIcon } from "@chakra-ui/icons";
 import {
-  nftAbi,
-  normalizeIpfsUris,
-  ProfileObject,
-} from "../context/ProfileProvider";
-import { Contract, utils } from "koilib";
-import { useAccount } from "../context/AccountProvider";
+  FaGlobe,
+  FaGithub,
+  FaDiscord,
+  FaTwitter,
+  FaRedditAlien,
+  FaTelegramPlane,
+  FaEthereum,
+  FaBitcoin,
+} from "react-icons/fa";
+import { Contract, Provider, utils } from "koilib";
 import { Abi } from "koilib/lib/interface";
 import profileAbiJson from "../contract/abi/profile-abi.json";
+import nftAbiJson from "../contract/abi/nft-abi.json";
 import { useNameService } from "../context/NameServiceProvider";
 import { NextPage } from "next";
 import { useRouter } from "next/router";
 import Logo from "../components/Logo";
-import { FaTwitter } from "react-icons/fa";
 import Head from "next/head";
+
+export type LinkObject = {
+  key: string;
+  value: string;
+};
+
+export type ProfileObject = {
+  avatar_contract_id?: string;
+  avatar_token_id?: string;
+  name?: string;
+  bio?: string;
+  theme?: string;
+  links?: LinkObject[];
+};
 
 const profileAbi: Abi = {
   koilib_types: profileAbiJson.types,
   ...profileAbiJson,
 };
 
+export const nftAbi: Abi = {
+  koilib_types: nftAbiJson.types,
+  ...nftAbiJson,
+};
+
+export enum SocialKeys {
+  WEBSITE = "website",
+  EMAIL = "email",
+  GITHUB = "github",
+  TWITTER = "twitter",
+  REDDIT = "reddit",
+  DISCORD = "discord",
+  TELEGRAM = "telegram",
+  ETH = "eth",
+  BTC = "btc",
+}
+
+export const ICONS = {
+  [SocialKeys.WEBSITE]: <FaGlobe />,
+  [SocialKeys.EMAIL]: <EmailIcon />,
+  [SocialKeys.GITHUB]: <FaGithub />,
+  [SocialKeys.TWITTER]: <FaTwitter />,
+  [SocialKeys.REDDIT]: <FaRedditAlien />,
+  [SocialKeys.DISCORD]: <FaDiscord />,
+  [SocialKeys.TELEGRAM]: <FaTelegramPlane />,
+  [SocialKeys.ETH]: <FaEthereum />,
+  [SocialKeys.BTC]: <FaBitcoin />,
+};
+
 const Profile: NextPage = () => {
   const {
     query: { name },
   } = useRouter();
-  const { provider } = useAccount();
   const { getOwner } = useNameService();
   const [address, setAddress] = useState("");
   const [profile, setProfile] = useState<ProfileObject>();
   const [isThemeLight, setIsThemeLight] = useState(true);
   const [nameFound, setNameFound] = useState(true);
   const [avatarSrc, setAvatarSrc] = useState("");
+  const [avatarMessage, setAvatarMessage] = useState("");
+  const [avatarLoading, setAvatarLoading] = useState(true);
   const theme = profile?.theme || "fff";
 
   useEffect(() => {
     const profileContract = new Contract({
       id: process.env.NEXT_PUBLIC_PROFILE_ADDR,
       abi: profileAbi,
-      provider,
+      provider: new Provider([process.env.NEXT_PUBLIC_KOINOS_RPC_URL!]),
     });
 
     const fetchProfile = async () => {
@@ -75,20 +123,31 @@ const Profile: NextPage = () => {
           const nftContract = new Contract({
             id: profileResult.avatar_contract_id,
             abi: nftAbi,
-            provider,
+            provider: new Provider([process.env.NEXT_PUBLIC_KOINOS_RPC_URL!]),
           });
 
           const { result: nftResult } = await nftContract!.functions.uri({});
 
           if (nftResult?.value) {
             const uri = normalizeIpfsUris(nftResult.value as string);
-            const metadata = await fetch(`${uri}/${profileResult.avatar_token_id}`);
-            const { image } = await metadata.json();
-            const imageSrc = normalizeIpfsUris(image);
-            setAvatarSrc(imageSrc);
+            try {
+              const metadata = await fetch(
+                `${uri}/${profileResult.avatar_token_id}`
+              );
+              const { image } = await metadata.json();
+              const imageSrc = normalizeIpfsUris(image);
+              setAvatarSrc(imageSrc);
+            } catch (error) {
+              setAvatarMessage("error loading avatar");
+              setAvatarLoading(false);
+            }
+          } else {
+            setAvatarMessage("error loading avatar");
+            setAvatarLoading(false);
           }
         } else {
-          setAvatarSrc("");
+          setAvatarMessage("no avatar set");
+          setAvatarLoading(false);
         }
       } else {
         setNameFound(false);
@@ -152,29 +211,13 @@ const Profile: NextPage = () => {
               gap="2"
               padding="8"
             >
-              {profile?.avatar_contract_id && profile.avatar_token_id ? (
-                <SkeletonCircle
-                  width="12em"
-                  height="12em"
-                  isLoaded={!!avatarSrc}
-                >
-                  <Avatar size="12em" src={avatarSrc} />
-                </SkeletonCircle>
-              ) : (
-                <Flex
-                  width="12em"
-                  height="12em"
-                  borderRadius="50%"
-                  borderColor={
-                    isThemeLight ? "blackAlpha.400" : "whiteAlpha.400"
-                  }
-                  borderWidth="1px"
-                  justifyContent="center"
-                  alignItems="center"
-                >
-                  No Avatar Set
-                </Flex>
-              )}
+              <SkeletonCircle
+                width="12em"
+                height="12em"
+                isLoaded={!avatarLoading}
+              >
+                <Avatar size="12em" src={avatarSrc} address={address} message={avatarMessage} />
+              </SkeletonCircle>
               <Text fontSize="4xl" lineHeight="1">
                 {profile?.name || "No Name Set"}
               </Text>
@@ -311,6 +354,23 @@ function isThemeColorLight(hexcolor: string) {
   const b = parseInt(bs, 16);
   const yiq = (r * 299 + g * 587 + b * 114) / 1000;
   return yiq >= 128;
+}
+
+function normalizeIpfsUris(uri: string) {
+  let result = uri;
+  if (uri.startsWith("ipfs://")) {
+    const path = uri.indexOf("/", 7);
+    if (path > -1) {
+      result =
+        "https://" +
+        uri.substring(7, path) +
+        ".ipfs.nftstorage.link" +
+        uri.substring(path);
+    } else {
+      result = "https://" + uri.substring(7) + ".ipfs.nftstorage.link";
+    }
+  }
+  return result;
 }
 
 export default Profile;
