@@ -65,6 +65,7 @@ function Avatar({ src, size, address, message }: AvatarProps) {
           justifyContent="center"
           alignItems="center"
           background="blackAlpha.800"
+          color="white"
         >
           {message}
         </Flex>
