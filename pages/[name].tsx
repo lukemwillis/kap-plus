@@ -81,10 +81,8 @@ const Profile: NextPage = () => {
           const { result: nftResult } = await nftContract!.functions.uri({});
 
           if (nftResult?.value) {
-            const buffer = utils.toUint8Array(profileResult.avatar_token_id);
-            const tokenId = new TextDecoder().decode(buffer);
             const uri = normalizeIpfsUris(nftResult.value as string);
-            const metadata = await fetch(`${uri}/${tokenId}`);
+            const metadata = await fetch(`${uri}/${profileResult.avatar_token_id}`);
             const { image } = await metadata.json();
             const imageSrc = normalizeIpfsUris(image);
             setAvatarSrc(imageSrc);
