@@ -14,7 +14,7 @@ export default function Logo({ size, light = false }: LogoProps) {
       height="auto"
       width={size}
       viewBox="0 0 708.661 255.118"
-      enable-background="new 0 0 708.661 255.118"
+      enableBackground="new 0 0 708.661 255.118"
     >
       <g id="Shadow">
         <g>

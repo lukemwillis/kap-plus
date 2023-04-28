@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import dynamic from "next/dynamic";
 import { Contract, Provider, utils } from "koilib";
 import nftAbiJson from "../contract/abi/nft-abi.json";
+import { Abi } from "koilib/lib/interface";
 
 export type LinkObject = {
   key: string;

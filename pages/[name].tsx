@@ -5,7 +5,6 @@ import {
   IconButton,
   Link,
   Skeleton,
-  SkeletonCircle,
   Stack,
   Text,
 } from "@chakra-ui/react";
@@ -124,7 +123,7 @@ const Profile: NextPage = () => {
   return (
     <>
       <Head>
-        <title>{profile?.name || name || "Loading..."} | KAP+</title>
+        <title>{`${profile?.name || name || "Loading..."} | KAP+`}</title>
       </Head>
       <Skeleton
         isLoaded={!!profile || !nameFound}
