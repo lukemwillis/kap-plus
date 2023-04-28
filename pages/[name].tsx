@@ -11,7 +11,7 @@ import {
 } from "@chakra-ui/react";
 import Avatar from "../components/Avatar";
 import { useEffect, useState } from "react";
-import { AddIcon, EmailIcon } from "@chakra-ui/icons";
+import { EmailIcon } from "@chakra-ui/icons";
 import {
   FaGlobe,
   FaGithub,
@@ -25,7 +25,6 @@ import {
 import { Contract, Provider, utils } from "koilib";
 import { Abi } from "koilib/lib/interface";
 import profileAbiJson from "../contract/abi/profile-abi.json";
-import nftAbiJson from "../contract/abi/nft-abi.json";
 import { useNameService } from "../context/NameServiceProvider";
 import { NextPage } from "next";
 import { useRouter } from "next/router";
@@ -49,11 +48,6 @@ export type ProfileObject = {
 const profileAbi: Abi = {
   koilib_types: profileAbiJson.types,
   ...profileAbiJson,
-};
-
-export const nftAbi: Abi = {
-  koilib_types: nftAbiJson.types,
-  ...nftAbiJson,
 };
 
 export enum SocialKeys {
@@ -89,9 +83,6 @@ const Profile: NextPage = () => {
   const [profile, setProfile] = useState<ProfileObject>();
   const [isThemeLight, setIsThemeLight] = useState(true);
   const [nameFound, setNameFound] = useState(true);
-  const [avatarSrc, setAvatarSrc] = useState("");
-  const [avatarMessage, setAvatarMessage] = useState("");
-  const [avatarLoading, setAvatarLoading] = useState(true);
   const theme = profile?.theme || "fff";
 
   useEffect(() => {
@@ -115,46 +106,12 @@ const Profile: NextPage = () => {
         if (profileResult?.theme) {
           setIsThemeLight(isThemeColorLight(profileResult.theme));
         }
-
-        if (
-          profileResult?.avatar_contract_id &&
-          profileResult.avatar_token_id
-        ) {
-          const nftContract = new Contract({
-            id: profileResult.avatar_contract_id,
-            abi: nftAbi,
-            provider: new Provider([process.env.NEXT_PUBLIC_KOINOS_RPC_URL!]),
-          });
-
-          const { result: nftResult } = await nftContract!.functions.uri({});
-
-          if (nftResult?.value) {
-            const uri = normalizeIpfsUris(nftResult.value as string);
-            try {
-              const metadata = await fetch(
-                `${uri}/${profileResult.avatar_token_id}`
-              );
-              const { image } = await metadata.json();
-              const imageSrc = normalizeIpfsUris(image);
-              setAvatarSrc(imageSrc);
-            } catch (error) {
-              setAvatarMessage("error loading avatar");
-              setAvatarLoading(false);
-            }
-          } else {
-            setAvatarMessage("error loading avatar");
-            setAvatarLoading(false);
-          }
-        } else {
-          setAvatarMessage("no avatar set");
-          setAvatarLoading(false);
-        }
       } else {
         setNameFound(false);
       }
     };
     fetchProfile();
-  }, [name]);
+  }, [name, getOwner]);
 
   useEffect(() => {
     if (!!profile || !nameFound) {
@@ -211,13 +168,7 @@ const Profile: NextPage = () => {
               gap="2"
               padding="8"
             >
-              <SkeletonCircle
-                width="12em"
-                height="12em"
-                isLoaded={!avatarLoading}
-              >
-                <Avatar size="12em" src={avatarSrc} address={address} message={avatarMessage} />
-              </SkeletonCircle>
+              <Avatar size="12em" profile={profile} address={address} />
               <Text fontSize="4xl" lineHeight="1">
                 {profile?.name || "No Name Set"}
               </Text>
@@ -354,23 +305,6 @@ function isThemeColorLight(hexcolor: string) {
   const b = parseInt(bs, 16);
   const yiq = (r * 299 + g * 587 + b * 114) / 1000;
   return yiq >= 128;
-}
-
-function normalizeIpfsUris(uri: string) {
-  let result = uri;
-  if (uri.startsWith("ipfs://")) {
-    const path = uri.indexOf("/", 7);
-    if (path > -1) {
-      result =
-        "https://" +
-        uri.substring(7, path) +
-        ".ipfs.nftstorage.link" +
-        uri.substring(path);
-    } else {
-      result = "https://" + uri.substring(7) + ".ipfs.nftstorage.link";
-    }
-  }
-  return result;
 }
 
 export default Profile;
